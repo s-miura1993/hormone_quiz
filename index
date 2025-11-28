@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>内分泌系ホルモンクイズ（生物基礎）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #f3f4f6;
+    }
+    header {
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.2rem;
+    }
+    .tagline {
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    #app-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    #status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      color: #444;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    #question-text {
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .choices {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px 0;
+    }
+    .choices li {
+      margin-bottom: 8px;
+    }
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      padding: 10px 14px;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s, transform 0.05s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .choice-btn:hover {
+      background: #f0f0f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      transform: translateY(-1px);
+    }
+    .choice-btn.correct {
+      background: #e0f8e7;
+      border-color: #35a56f;
+    }
+    .choice-btn.incorrect {
+      background: #ffe5e5;
+      border-color: #d9534f;
+    }
+    #feedback {
+      min-height: 1.4em;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    #feedback.correct {
+      color: #2b8a3e;
+    }
+    #feedback.incorrect {
+      color: #c0392b;
+    }
+    #explanation {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 14px;
+      min-height: 1.2em;
+    }
+    #controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    #next-btn, #restart-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.05s;
+    }
+    #next-btn {
+      background: #2563eb;
+      color: #fff;
+    }
+    #next-btn:disabled {
+      background: #9cb5f2;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    #restart-btn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    #next-btn:hover:not(:disabled),
+    #restart-btn:hover {
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transform: translateY(-1px);
+    }
+    #mode-info {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #eef2ff;
+      color: #3730a3;
+      margin-left: 4px;
+    }
+    #mode-select {
+      font-size: 0.8rem;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    #mode-select label {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>内分泌系ホルモンクイズ</h1>
+    <div class="tagline">
+      高校「生物基礎」 内分泌系（指定13ホルモンのみ）
+      <span class="badge">GitHub Pages 対応</span>
+      <span class="badge">ランダム出題</span>
+    </div>
+  </header>
+
+  <main id="app-card">
+    <div id="mode-select">
+      出題モード：
+      <label>
+        <input type="radio" name="mode" value="all" checked />
+        全30問ランダム
+      </label>
+      <label>
+        <input type="radio" name="mode" value="mc" />
+        四択問題のみ
+      </label>
+      <label>
+        <input type="radio" name="mode" value="tf" />
+        正誤（二択）のみ
+      </label>
+    </div>
+
+    <div id="status-bar">
+      <div>問題 <span id="question-number"></span> / <span id="total-questions"></span></div>
+      <div>正答数：<span id="score">0</span></div>
+    </div>
+
+    <div id="question-text"></div>
+    <ul class="choices" id="choices-list"></ul>
+
+    <div id="feedback"></div>
+    <div id="explanation"></div>
+
+    <div id="controls">
+      <button id="next-btn" disabled>次の問題へ ▶</button>
+      <button id="restart-btn">問題をシャッフルしてやり直す</button>
+      <div id="mode-info">※開始・やり直しのたびに問題の順番がランダムになります。</div>
+    </div>
+  </main>
+
+  <script>
+    // 使用ホルモン（指定13種）
+    // 放出ホルモン、放出抑制ホルモン、成長ホルモン、甲状腺刺激ホルモン、
+    // 副腎皮質刺激ホルモン、バソプレシン、チロキシン、パラトルモン、
+    // 糖質コルチコイド、鉱質コルチコイド、アドレナリン、グルカゴン、インスリン
+
+    // クイズデータ: type: "mc" = 四択, "tf" = 正誤（二択）
+    const QUESTIONS = [
+      {
+        id: 1,
+        type: "mc",
+        question: "副腎髄質から分泌されるホルモンはどれか。",
+        choices: ["アドレナリン", "グルカゴン", "インスリン", "糖質コルチコイド"],
+        correctIndex: 0,
+        explanation: "副腎髄質は、交感神経の刺激に応じてアドレナリンを分泌し、血糖値上昇や心拍数増加などを引き起こします。"
+      },
+      {
+        id: 2,
+        type: "mc",
+        question: "血糖値を下げる働きをもつ唯一のホルモンはどれか。",
+        choices: ["グルカゴン", "アドレナリン", "インスリン", "糖質コルチコイド"],
+        correctIndex: 2,
+        explanation: "血糖値を下げるホルモンはインスリンのみで、すい臓ランゲルハンス島B細胞から分泌されます。"
+      },
+      {
+        id: 3,
+        type: "mc",
+        question: "血糖値を上げるホルモンの組み合わせとして正しいものはどれか。",
+        choices: [
+          "アドレナリン＋グルカゴン",
+          "インスリン＋チロキシン",
+          "バソプレシン＋鉱質コルチコイド",
+          "インスリン＋成長ホルモン"
+        ],
+        correctIndex: 0,
+        explanation: "アドレナリンとグルカゴンはいずれも血糖値を上昇させるホルモンです。"
+      },
+      {
+        id: 4,
+        type: "mc",
+        question: "脳下垂体前葉から分泌されるホルモンはどれか。",
+        choices: ["成長ホルモン", "バソプレシン", "インスリン", "チロキシン"],
+        correctIndex: 0,
+        explanation: "成長ホルモンは脳下垂体前葉から分泌され、タンパク質合成促進や血糖値上昇などに関与します。"
+      },
+      {
+        id: 5,
+        type: "mc",
+        question: "甲状腺を刺激してチロキシン分泌を促すホルモンはどれか。",
+        choices: ["放出ホルモン", "甲状腺刺激ホルモン", "副腎皮質刺激ホルモン", "パラトルモン"],
+        correctIndex: 1,
+        explanation: "甲状腺刺激ホルモン（TSH）は脳下垂体前葉から分泌され、甲状腺に作用してチロキシン分泌を促します。"
+      },
+      {
+        id: 6,
+        type: "mc",
+        question: "副腎皮質を刺激するホルモンはどれか。",
+        choices: ["副腎皮質刺激ホルモン", "鉱質コルチコイド", "糖質コルチコイド", "放出抑制ホルモン"],
+        correctIndex: 0,
+        explanation: "副腎皮質刺激ホルモン（ACTH）は脳下垂体前葉から分泌され、副腎皮質に働きかけて糖質コルチコイドなどの分泌を促します。"
+      },
+      {
+        id: 7,
+        type: "mc",
+        question: "バソプレシンの主な作用はどれか。",
+        choices: [
+          "血中カルシウム濃度を上げる",
+          "腎臓での水の再吸収を促進する",
+          "代謝率を上げる",
+          "血糖値を上げる"
+        ],
+        correctIndex: 1,
+        explanation: "バソプレシン（抗利尿ホルモン）は腎臓で水の再吸収を促進し、尿量を減らします。"
+      },
+      {
+        id: 8,
+        type: "mc",
+        question: "チロキシンの主な働きとして正しいものはどれか。",
+        choices: [
+          "血糖値を下げる",
+          "代謝を促進する",
+          "尿量を増やす",
+          "血中カルシウム濃度を上げる"
+        ],
+        correctIndex: 1,
+        explanation: "チロキシン（甲状腺ホルモン）は全身の代謝を促進し、成長やエネルギー代謝に重要な役割を果たします。"
+      },
+      {
+        id: 9,
+        type: "mc",
+        question: "血中カルシウム濃度を上げる作用をもつホルモンはどれか。",
+        choices: ["パラトルモン", "インスリン", "アドレナリン", "成長ホルモン"],
+        correctIndex: 0,
+        explanation: "パラトルモン（副甲状腺ホルモン）は骨からのカルシウムの溶出などを促進し、血中カルシウム濃度を上昇させます。"
+      },
+      {
+        id: 10,
+        type: "mc",
+        question: "糖質コルチコイドの働きとして正しいものはどれか。",
+        choices: [
+          "血糖値を上げる",
+          "血糖値を下げる",
+          "尿量を減らす",
+          "代謝を抑制する"
+        ],
+        correctIndex: 0,
+        explanation: "糖質コルチコイド（コルチゾールなど）は糖新生を促進し、血糖値を上昇させます。"
+      },
+      {
+        id: 11,
+        type: "mc",
+        question: "鉱質コルチコイドの作用として正しいものはどれか。",
+        choices: [
+          "ナトリウム再吸収を促進する",
+          "血糖値を下げる",
+          "代謝を促進する",
+          "副腎髄質を刺激する"
+        ],
+        correctIndex: 0,
+        explanation: "鉱質コルチコイド（アルドステロンなど）は腎臓でNa⁺の再吸収を促進し、水分量と血圧の調節に関わります。"
+      },
+      {
+        id: 12,
+        type: "mc",
+        question: "グルカゴンが主に作用する組織はどれか。",
+        choices: ["腎臓", "肝臓", "甲状腺", "副腎皮質"],
+        correctIndex: 1,
+        explanation: "グルカゴンは肝臓に働き、グリコーゲン分解などを通じて血糖値を上昇させます。"
+      },
+      {
+        id: 13,
+        type: "mc",
+        question: "成長ホルモンの働きとして最も適当なものはどれか。",
+        choices: [
+          "血糖値を上げる",
+          "血糖値を下げる",
+          "カルシウム濃度を下げる",
+          "アドレナリンの分泌を抑える"
+        ],
+        correctIndex: 0,
+        explanation: "成長ホルモンはタンパク質合成促進のほか、脂肪分解などを通じて血糖値を上昇させる作用もあります。"
+      },
+      {
+        id: 14,
+        type: "mc",
+        question: "放出ホルモンが分泌される場所はどれか。",
+        choices: ["甲状腺", "脳下垂体前葉", "視床下部", "副腎皮質"],
+        correctIndex: 2,
+        explanation: "放出ホルモン（放出因子）は視床下部から分泌され、脳下垂体前葉ホルモンの分泌を促進します。"
+      },
+      {
+        id: 15,
+        type: "mc",
+        question: "放出抑制ホルモンの働きとして正しいものはどれか。",
+        choices: [
+          "脳下垂体ホルモンの分泌を促進する",
+          "脳下垂体ホルモンの分泌を抑制する",
+          "副腎皮質を刺激する",
+          "血糖値を下げる"
+        ],
+        correctIndex: 1,
+        explanation: "放出抑制ホルモン（抑制因子）は視床下部から分泌され、脳下垂体前葉ホルモンの分泌を抑制します。"
+      },
+      {
+        id: 16,
+        type: "mc",
+        question: "次のうち、すい臓ランゲルハンス島A細胞から分泌されるホルモンはどれか。",
+        choices: ["グルカゴン", "インスリン", "バソプレシン", "チロキシン"],
+        correctIndex: 0,
+        explanation: "ランゲルハンス島A細胞からはグルカゴンが分泌されます。B細胞からはインスリンが分泌されます。"
+      },
+      {
+        id: 17,
+        type: "mc",
+        question: "甲状腺から分泌されるホルモンはどれか。",
+        choices: ["チロキシン", "インスリン", "鉱質コルチコイド", "バソプレシン"],
+        correctIndex: 0,
+        explanation: "甲状腺から分泌される代表的なホルモンがチロキシンです。"
+      },
+      {
+        id: 18,
+        type: "mc",
+        question: "副甲状腺から分泌されるホルモンはどれか。",
+        choices: ["パラトルモン", "甲状腺刺激ホルモン", "糖質コルチコイド", "バソプレシン"],
+        correctIndex: 0,
+        explanation: "副甲状腺（上皮小体）から分泌されるのがパラトルモンで、血中カルシウム濃度を上昇させます。"
+      },
+      {
+        id: 19,
+        type: "mc",
+        question: "副腎皮質から分泌されるホルモンの組み合わせとして正しいものはどれか。",
+        choices: [
+          "糖質コルチコイド＋鉱質コルチコイド",
+          "アドレナリン＋グルカゴン",
+          "インスリン＋グルカゴン",
+          "チロキシン＋パラトルモン"
+        ],
+        correctIndex: 0,
+        explanation: "副腎皮質では糖質コルチコイドや鉱質コルチコイドなどが分泌されます。"
+      },
+      {
+        id: 20,
+        type: "mc",
+        question: "ストレス時に長期的に血糖値を上げる働きが最も大きいホルモンはどれか。",
+        choices: ["糖質コルチコイド", "アドレナリン", "インスリン", "バソプレシン"],
+        correctIndex: 0,
+        explanation: "ストレスが長期化したときには糖質コルチコイドが働き、糖新生を促して血糖値を上げます。"
+      },
+      // 正誤（二択）
+      {
+        id: 21,
+        type: "tf",
+        question: "アドレナリンは副腎髄質から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "アドレナリンは副腎髄質から分泌されるホルモンで、血糖値上昇や心拍数増加に関与します。"
+      },
+      {
+        id: 22,
+        type: "tf",
+        question: "インスリンはすい臓から分泌され、血糖値を下げる働きをもつ。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "インスリンはすい臓ランゲルハンス島B細胞から分泌され、血糖値を下げます。"
+      },
+      {
+        id: 23,
+        type: "tf",
+        question: "グルカゴンは血糖値を下げる働きをもつ。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "グルカゴンは血糖値を上げる方向に働くホルモンです。"
+      },
+      {
+        id: 24,
+        type: "tf",
+        question: "鉱質コルチコイドは腎臓でナトリウムの再吸収を促進する。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "鉱質コルチコイド（アルドステロンなど）はNa⁺の再吸収を促し、体液量や血圧の調節に関与します。"
+      },
+      {
+        id: 25,
+        type: "tf",
+        question: "放出ホルモンは脳下垂体前葉から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "放出ホルモンは視床下部から分泌され、脳下垂体前葉ホルモンの分泌を促進します。"
+      },
+      {
+        id: 26,
+        type: "tf",
+        question: "甲状腺刺激ホルモンは脳下垂体前葉から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "甲状腺刺激ホルモン（TSH）は脳下垂体前葉ホルモンの一つです。"
+      },
+      {
+        id: 27,
+        type: "tf",
+        question: "パラトルモンは血中カルシウム濃度を下げる働きをもつ。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "パラトルモンは血中カルシウム濃度を上昇させる方向に働きます。"
+      },
+      {
+        id: 28,
+        type: "tf",
+        question: "バソプレシンは腎臓での水の再吸収を抑制し、尿量を増やす。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "バソプレシンは水の再吸収を促進し、尿量を減らす（抗利尿）のが主な作用です。"
+      },
+      {
+        id: 29,
+        type: "tf",
+        question: "チロキシンは代謝を促進する作用をもつ。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "チロキシン（甲状腺ホルモン）は代謝率を高め、成長やエネルギー代謝に重要です。"
+      },
+      {
+        id: 30,
+        type: "tf",
+        question: "糖質コルチコイドとアドレナリンはいずれも血糖値を上昇させる。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "どちらも血糖値を上昇させるホルモンですが、糖質コルチコイドは比較的長期的、アドレナリンは急性的なストレス応答で働きます。"
+      }
+    ];
+
+    // ユーティリティ：配列シャッフル
+    function shuffleArray(array) {
+      const arr = array.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // 状態
+    let shuffledQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let currentMode = "all"; // "all" | "mc" | "tf"
+
+    // DOM 取得
+    const questionNumberEl = document.getElementById("question-number");
+    const totalQuestionsEl = document.getElementById("total-questions");
+    const scoreEl = document.getElementById("score");
+    const questionTextEl = document.getElementById("question-text");
+    const choicesListEl = document.getElementById("choices-list");
+    const feedbackEl = document.getElementById("feedback");
+    const explanationEl = document.getElementById("explanation");
+    const nextBtn = document.getElementById("next-btn");
+    const restartBtn = document.getElementById("restart-btn");
+    const modeRadios = document.querySelectorAll("input[name='mode']");
+
+    modeRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        currentMode = radio.value; // all / mc / tf
+        startQuiz();
+      });
+    });
+
+    function filteredQuestionsByMode(mode) {
+      if (mode === "mc") return QUESTIONS.filter(q => q.type === "mc");
+      if (mode === "tf") return QUESTIONS.filter(q => q.type === "tf");
+      return QUESTIONS.slice(); // all
+    }
+
+    function startQuiz() {
+      const base = filteredQuestionsByMode(currentMode);
+      shuffledQuestions = shuffleArray(base);
+      currentIndex = 0;
+      score = 0;
+      scoreEl.textContent = score;
+      totalQuestionsEl.textContent = shuffledQuestions.length;
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      answered = false;
+      nextBtn.disabled = true;
+      feedbackEl.textContent = "";
+      feedbackEl.className = "";
+      explanationEl.textContent = "";
+
+      const q = shuffledQuestions[currentIndex];
+      questionNumberEl.textContent = currentIndex + 1;
+      questionTextEl.textContent = q.question;
+
+      // 選択肢の描画
+      choicesListEl.innerHTML = "";
+      q.choices.forEach((choiceText, index) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = (q.type === "mc" ? (index + 1) + "． " : "") + choiceText;
+        btn.addEventListener("click", () => handleChoiceClick(index));
+        li.appendChild(btn);
+        choicesListEl.appendChild(li);
+      });
+
+      // ボタン文言リセット
+      nextBtn.textContent = "次の問題へ ▶";
+    }
+
+    function handleChoiceClick(selectedIndex) {
+      if (answered) return; // 二度押し防止
+      answered = true;
+
+      const q = shuffledQuestions[currentIndex];
+      const allButtons = document.querySelectorAll(".choice-btn");
+
+      allButtons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correctIndex) {
+          btn.classList.add("correct");
+        }
+        if (idx === selectedIndex && idx !== q.correctIndex) {
+          btn.classList.add("incorrect");
+        }
+      });
+
+      if (selectedIndex === q.correctIndex) {
+        feedbackEl.textContent = "◎ 正解です！";
+        feedbackEl.className = "correct";
+        score++;
+        scoreEl.textContent = score;
+      } else {
+        feedbackEl.textContent = "× 不正解です。";
+        feedbackEl.className = "incorrect";
+      }
+
+      explanationEl.textContent = q.explanation || "";
+      nextBtn.disabled = false;
+      if (currentIndex === shuffledQuestions.length - 1) {
+        nextBtn.textContent = "結果を表示";
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (currentIndex < shuffledQuestions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      questionTextEl.textContent = "お疲れさまでした！ 全問題が終了しました。";
+      choicesListEl.innerHTML = "";
+      feedbackEl.className = "";
+      feedbackEl.textContent = "";
+      explanationEl.textContent = `あなたの正答数は ${score} / ${shuffledQuestions.length} でした。`;
+      nextBtn.disabled = true;
+      nextBtn.textContent = "終了";
+    }
+
+    restartBtn.addEventListener("click", () => {
+      startQuiz();
+    });
+
+    // 初期化
+    startQuiz();
+  </script>
+</body>
+</html>
