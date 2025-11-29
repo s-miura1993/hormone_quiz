@@ -12,6 +12,10 @@
       max-width: 900px;
       margin: 0 auto;
       background: #f3f4f6;
+      transition: background 0.2s ease;
+    }
+    body.review-mode {
+      background: #fef2f2; /* 復習モード時の背景色（うすい赤） */
     }
     header {
       margin-bottom: 1rem;
@@ -30,6 +34,13 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      border: 2px solid transparent;
+    }
+    #app-card.review-mode {
+      border-color: #f97316; /* オレンジ系 */
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.25);
+      background: #fff7ed;
     }
     #status-bar {
       display: flex;
@@ -156,9 +167,34 @@
       font-size: 0.8rem;
       color: #374151;
       margin-bottom: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
     }
     #mode-select label {
       margin-right: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    /* 復習モードラベルを特別に大きく＆目立たせる */
+    #mode-select label.review-label {
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 2px solid #f97316;
+      background: #fff7ed;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    #mode-select label.review-label input {
+      transform: scale(1.2);
+    }
+    #mode-select label.review-label.active {
+      background: #fed7aa;
+      border-color: #ea580c;
+      box-shadow: 0 0 0 2px rgba(248,113,113,0.35);
     }
   </style>
 </head>
@@ -177,21 +213,21 @@
   <main id="app-card">
     <div id="mode-select">
       出題モード：
-      <label>
-        <input type="radio" name="mode" value="all" checked />
+      <label for="mode-all">
+        <input type="radio" id="mode-all" name="mode" value="all" checked />
         全30問ランダム
       </label>
-      <label>
-        <input type="radio" name="mode" value="mc" />
+      <label for="mode-mc">
+        <input type="radio" id="mode-mc" name="mode" value="mc" />
         四択問題のみ
       </label>
-      <label>
-        <input type="radio" name="mode" value="tf" />
+      <label for="mode-tf">
+        <input type="radio" id="mode-tf" name="mode" value="tf" />
         正誤（二択）のみ
       </label>
-      <label>
-        <input type="radio" name="mode" value="review" />
-        よく間違える問題（復習）
+      <label for="mode-review" class="review-label">
+        <input type="radio" id="mode-review" name="mode" value="review" />
+        ★ よく間違える問題（復習）
       </label>
     </div>
 
@@ -532,7 +568,6 @@
       saveStats();
     }
 
-    // 配列シャッフル
     function shuffleArray(array) {
       const arr = array.slice();
       for (let i = arr.length - 1; i > 0; i--) {
@@ -542,15 +577,13 @@
       return arr;
     }
 
-    // 状態
     let shuffledQuestions = [];
     let currentIndex = 0;
     let score = 0;
     let answered = false;
     let currentMode = "all"; // all | mc | tf | review
-    let currentChoiceOrder = []; // 今表示している問題の「元インデックス」の並び
+    let currentChoiceOrder = [];
 
-    // DOM
     const questionNumberEl = document.getElementById("question-number");
     const totalQuestionsEl = document.getElementById("total-questions");
     const scoreEl = document.getElementById("score");
@@ -563,6 +596,9 @@
     const restartBtn = document.getElementById("restart-btn");
     const resetStatBtn = document.getElementById("reset-stat-btn");
     const modeRadios = document.querySelectorAll("input[name='mode']");
+    const bodyEl = document.body;
+    const appCardEl = document.getElementById("app-card");
+    const reviewLabelEl = document.querySelector("label[for='mode-review']");
 
     modeRadios.forEach(radio => {
       radio.addEventListener("change", () => {
@@ -570,6 +606,18 @@
         startQuiz();
       });
     });
+
+    function updateModeStyles() {
+      if (currentMode === "review") {
+        bodyEl.classList.add("review-mode");
+        appCardEl.classList.add("review-mode");
+        if (reviewLabelEl) reviewLabelEl.classList.add("active");
+      } else {
+        bodyEl.classList.remove("review-mode");
+        appCardEl.classList.remove("review-mode");
+        if (reviewLabelEl) reviewLabelEl.classList.remove("active");
+      }
+    }
 
     function filteredQuestionsByMode(mode) {
       if (mode === "mc") return QUESTIONS.filter(q => q.type === "mc");
@@ -590,6 +638,8 @@
     }
 
     function startQuiz() {
+      updateModeStyles();
+
       const base = filteredQuestionsByMode(currentMode);
       if (currentMode === "review" && base.length === 0) {
         shuffledQuestions = [];
@@ -642,7 +692,6 @@
         wrongCountEl.textContent = "";
       }
 
-      // ▼▼ 選択肢の並びをシャッフル ▼▼
       const originalIndices = q.choices.map((_, idx) => idx);
       currentChoiceOrder = shuffleArray(originalIndices);
 
@@ -681,7 +730,6 @@
       const q = shuffledQuestions[currentIndex];
       const allButtons = document.querySelectorAll(".choice-btn");
 
-      // currentChoiceOrder[displayIdx] が元データのインデックス
       allButtons.forEach((btn, displayIdx) => {
         btn.disabled = true;
         const originalIndex = currentChoiceOrder[displayIdx];
@@ -752,7 +800,6 @@
       }
     });
 
-    // 初期化
     loadStats();
     startQuiz();
   </script>
