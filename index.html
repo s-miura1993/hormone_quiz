@@ -676,6 +676,7 @@
       feedbackEl.className = "";
       wrongCountEl.textContent = "";
       explanationEl.textContent = "";
+      explanationEl.classList.remove("visible");
       nextBtn.disabled = true;
       nextBtn.textContent = "次の問題へ ▶";
     }
@@ -687,6 +688,7 @@
       feedbackEl.className = "";
       wrongCountEl.textContent = "";
       explanationEl.textContent = "";
+      explanationEl.classList.remove("visible");  // ★ 解説ボックスを隠す
 
       const q = shuffledQuestions[currentIndex];
       questionNumberEl.textContent = currentIndex + 1;
@@ -768,7 +770,8 @@
         wrongCountEl.textContent = `この問題を間違えた回数：${s.incorrect}回`;
       }
 
-      explanationEl.textContent = q.explanation || "";
+      explanationEl.innerHTML = "<strong>【解説】</strong><br>" + (q.explanation || "");
+　　　explanationEl.classList.add("visible");  // ★ ボックスを表示
       nextBtn.disabled = false;
       if (currentIndex === shuffledQuestions.length - 1) {
         nextBtn.textContent = "結果を表示";
@@ -790,6 +793,7 @@
       feedbackEl.className = "";
       feedbackEl.textContent = "";
       wrongCountEl.textContent = "";
+      explanationEl.classList.remove("visible");
       explanationEl.textContent = `あなたの正答数は ${score} / ${shuffledQuestions.length} でした。`;
       nextBtn.disabled = true;
       nextBtn.textContent = "終了";
