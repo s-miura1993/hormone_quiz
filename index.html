@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>内分泌系ホルモンクイズ（生物基礎）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.6;
       padding: 20px;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      background: #f5f5f5;
+      background: #f3f4f6;
+    }
+    header {
+      margin-bottom: 1rem;
     }
     h1 {
       font-size: 1.6rem;
@@ -21,7 +25,7 @@
       font-size: 0.9rem;
       margin-bottom: 1rem;
     }
-    #quiz-container {
+    #app-card {
       background: #ffffff;
       border-radius: 12px;
       padding: 20px;
@@ -33,6 +37,8 @@
       font-size: 0.9rem;
       margin-bottom: 10px;
       color: #444;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     #question-text {
       font-weight: 600;
@@ -72,7 +78,7 @@
     }
     #feedback {
       min-height: 1.4em;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
       font-weight: 600;
     }
     #feedback.correct {
@@ -80,6 +86,12 @@
     }
     #feedback.incorrect {
       color: #c0392b;
+    }
+    #wrong-count {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 6px;
+      min-height: 1.2em;
     }
     #explanation {
       font-size: 0.9rem;
@@ -95,12 +107,12 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    #next-btn, #restart-btn {
+    #next-btn, #restart-btn, #reset-stat-btn {
       border-radius: 999px;
       border: none;
       padding: 8px 16px;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       transition: background 0.15s, box-shadow 0.15s, transform 0.05s;
     }
     #next-btn {
@@ -117,8 +129,13 @@
       background: #e5e7eb;
       color: #111827;
     }
+    #reset-stat-btn {
+      background: #fee2e2;
+      color: #991b1b;
+    }
     #next-btn:hover:not(:disabled),
-    #restart-btn:hover {
+    #restart-btn:hover,
+    #reset-stat-btn:hover {
       box-shadow: 0 1px 4px rgba(0,0,0,0.15);
       transform: translateY(-1px);
     }
@@ -135,15 +152,49 @@
       color: #3730a3;
       margin-left: 4px;
     }
+    #mode-select {
+      font-size: 0.8rem;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    #mode-select label {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>内分泌系ホルモンクイズ</h1>
-  <div class="tagline">
-    高校「生物基礎」・内分泌系（指定13ホルモンのみ）<span class="badge">ランダム出題</span>
-  </div>
+  <header>
+    <h1>内分泌系ホルモンクイズ</h1>
+    <div class="tagline">
+      高校「生物基礎」 内分泌系（指定13ホルモンのみ）
+      <span class="badge">GitHub Pages</span>
+      <span class="badge">ランダム出題</span>
+      <span class="badge">復習モード</span>
+      <span class="badge">選択肢シャッフル</span>
+    </div>
+  </header>
 
-  <div id="quiz-container">
+  <main id="app-card">
+    <div id="mode-select">
+      出題モード：
+      <label>
+        <input type="radio" name="mode" value="all" checked />
+        全30問ランダム
+      </label>
+      <label>
+        <input type="radio" name="mode" value="mc" />
+        四択問題のみ
+      </label>
+      <label>
+        <input type="radio" name="mode" value="tf" />
+        正誤（二択）のみ
+      </label>
+      <label>
+        <input type="radio" name="mode" value="review" />
+        よく間違える問題（復習）
+      </label>
+    </div>
+
     <div id="status-bar">
       <div>問題 <span id="question-number"></span> / <span id="total-questions"></span></div>
       <div>正答数：<span id="score">0</span></div>
@@ -153,18 +204,19 @@
     <ul class="choices" id="choices-list"></ul>
 
     <div id="feedback"></div>
+    <div id="wrong-count"></div>
     <div id="explanation"></div>
 
     <div id="controls">
       <button id="next-btn" disabled>次の問題へ ▶</button>
       <button id="restart-btn">問題をシャッフルしてやり直す</button>
-      <div id="mode-info">※ページを開くたびに問題の順番がランダムになります。</div>
+      <button id="reset-stat-btn" title="この端末に保存された間違いデータを消去します">復習データをリセット</button>
+      <div id="mode-info">※この端末のブラウザに「よく間違える問題」の履歴を保存します。</div>
     </div>
-  </div>
+  </main>
 
   <script>
-    // クイズデータ
-    // type: "mc" = 四択, "tf" = 正誤（二択）
+    // クイズデータ: type: "mc" = 四択, "tf" = 正誤（二択）
     const QUESTIONS = [
       {
         id: 1,
@@ -366,8 +418,6 @@
         correctIndex: 0,
         explanation: "ストレスが長期化したときには糖質コルチコイドが働き、糖新生を促して血糖値を上げます。"
       },
-
-      // ここから正誤問題（二択）
       {
         id: 21,
         type: "tf",
@@ -450,7 +500,39 @@
       }
     ];
 
-    // ユーティリティ：配列シャッフル
+    const STORAGE_KEY = "hormoneQuizStats";
+
+    // stats = { [id]: { attempts, correct, incorrect } }
+    let stats = {};
+
+    function loadStats() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          stats = {};
+        } else {
+          const parsed = JSON.parse(raw);
+          stats = parsed && typeof parsed === "object" ? parsed : {};
+        }
+      } catch (e) {
+        stats = {};
+      }
+    }
+
+    function saveStats() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function resetStats() {
+      stats = {};
+      saveStats();
+    }
+
+    // 配列シャッフル
     function shuffleArray(array) {
       const arr = array.slice();
       for (let i = arr.length - 1; i > 0; i--) {
@@ -460,23 +542,66 @@
       return arr;
     }
 
+    // 状態
     let shuffledQuestions = [];
     let currentIndex = 0;
     let score = 0;
     let answered = false;
+    let currentMode = "all"; // all | mc | tf | review
+    let currentChoiceOrder = []; // 今表示している問題の「元インデックス」の並び
 
+    // DOM
     const questionNumberEl = document.getElementById("question-number");
     const totalQuestionsEl = document.getElementById("total-questions");
     const scoreEl = document.getElementById("score");
     const questionTextEl = document.getElementById("question-text");
     const choicesListEl = document.getElementById("choices-list");
     const feedbackEl = document.getElementById("feedback");
+    const wrongCountEl = document.getElementById("wrong-count");
     const explanationEl = document.getElementById("explanation");
     const nextBtn = document.getElementById("next-btn");
     const restartBtn = document.getElementById("restart-btn");
+    const resetStatBtn = document.getElementById("reset-stat-btn");
+    const modeRadios = document.querySelectorAll("input[name='mode']");
+
+    modeRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        currentMode = radio.value;
+        startQuiz();
+      });
+    });
+
+    function filteredQuestionsByMode(mode) {
+      if (mode === "mc") return QUESTIONS.filter(q => q.type === "mc");
+      if (mode === "tf") return QUESTIONS.filter(q => q.type === "tf");
+      if (mode === "review") {
+        const wrongs = QUESTIONS.filter(q => {
+          const s = stats[q.id];
+          return s && s.incorrect > 0;
+        });
+        wrongs.sort((a, b) => {
+          const sa = stats[a.id] ? stats[a.id].incorrect : 0;
+          const sb = stats[b.id] ? stats[b.id].incorrect : 0;
+          return sb - sa;
+        });
+        return wrongs;
+      }
+      return QUESTIONS.slice();
+    }
 
     function startQuiz() {
-      shuffledQuestions = shuffleArray(QUESTIONS);
+      const base = filteredQuestionsByMode(currentMode);
+      if (currentMode === "review" && base.length === 0) {
+        shuffledQuestions = [];
+        currentIndex = 0;
+        score = 0;
+        scoreEl.textContent = score;
+        totalQuestionsEl.textContent = 0;
+        showNoReviewMessage();
+        return;
+      }
+
+      shuffledQuestions = shuffleArray(base);
       currentIndex = 0;
       score = 0;
       scoreEl.textContent = score;
@@ -484,48 +609,95 @@
       loadQuestion();
     }
 
+    function showNoReviewMessage() {
+      questionNumberEl.textContent = "-";
+      questionTextEl.textContent =
+        "まだ「間違えた問題」の記録がありません。まずは通常モード（全30問など）で問題を解いてみましょう。";
+      choicesListEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "";
+      wrongCountEl.textContent = "";
+      explanationEl.textContent = "";
+      nextBtn.disabled = true;
+      nextBtn.textContent = "次の問題へ ▶";
+    }
+
     function loadQuestion() {
       answered = false;
       nextBtn.disabled = true;
       feedbackEl.textContent = "";
       feedbackEl.className = "";
+      wrongCountEl.textContent = "";
       explanationEl.textContent = "";
 
       const q = shuffledQuestions[currentIndex];
       questionNumberEl.textContent = currentIndex + 1;
       questionTextEl.textContent = q.question;
 
-      // 選択肢の描画
+      const s = stats[q.id];
+      const wrongTimes = s ? s.incorrect || 0 : 0;
+      if (wrongTimes > 0) {
+        wrongCountEl.textContent = `この問題を間違えた回数：${wrongTimes}回`;
+      } else {
+        wrongCountEl.textContent = "";
+      }
+
+      // ▼▼ 選択肢の並びをシャッフル ▼▼
+      const originalIndices = q.choices.map((_, idx) => idx);
+      currentChoiceOrder = shuffleArray(originalIndices);
+
       choicesListEl.innerHTML = "";
-      q.choices.forEach((choiceText, index) => {
+      currentChoiceOrder.forEach((choiceIndex, displayIdx) => {
         const li = document.createElement("li");
         const btn = document.createElement("button");
         btn.className = "choice-btn";
-        btn.textContent = (q.type === "mc" ? (index + 1) + "． " : "") + choiceText;
-        btn.addEventListener("click", () => handleChoiceClick(index, btn));
+        const labelPrefix = q.type === "mc" ? (displayIdx + 1) + "． " : "";
+        btn.textContent = labelPrefix + q.choices[choiceIndex];
+        btn.addEventListener("click", () => handleChoiceClick(choiceIndex));
         li.appendChild(btn);
         choicesListEl.appendChild(li);
       });
+
+      nextBtn.textContent = "次の問題へ ▶";
     }
 
-    function handleChoiceClick(selectedIndex, btnElement) {
-      if (answered) return; // 二度押し防止
+    function updateStats(q, isCorrect) {
+      if (!stats[q.id]) {
+        stats[q.id] = { attempts: 0, correct: 0, incorrect: 0 };
+      }
+      stats[q.id].attempts += 1;
+      if (isCorrect) {
+        stats[q.id].correct += 1;
+      } else {
+        stats[q.id].incorrect += 1;
+      }
+      saveStats();
+    }
+
+    function handleChoiceClick(selectedOriginalIndex) {
+      if (answered) return;
       answered = true;
 
       const q = shuffledQuestions[currentIndex];
       const allButtons = document.querySelectorAll(".choice-btn");
 
-      allButtons.forEach((btn, idx) => {
+      // currentChoiceOrder[displayIdx] が元データのインデックス
+      allButtons.forEach((btn, displayIdx) => {
         btn.disabled = true;
-        if (idx === q.correctIndex) {
+        const originalIndex = currentChoiceOrder[displayIdx];
+
+        if (originalIndex === q.correctIndex) {
           btn.classList.add("correct");
         }
-        if (idx === selectedIndex && idx !== q.correctIndex) {
+        if (originalIndex === selectedOriginalIndex && originalIndex !== q.correctIndex) {
           btn.classList.add("incorrect");
         }
       });
 
-      if (selectedIndex === q.correctIndex) {
+      const isCorrect = selectedOriginalIndex === q.correctIndex;
+      updateStats(q, isCorrect);
+
+      if (isCorrect) {
         feedbackEl.textContent = "◎ 正解です！";
         feedbackEl.className = "correct";
         score++;
@@ -535,12 +707,15 @@
         feedbackEl.className = "incorrect";
       }
 
+      const s = stats[q.id];
+      if (s && s.incorrect > 0) {
+        wrongCountEl.textContent = `この問題を間違えた回数：${s.incorrect}回`;
+      }
+
       explanationEl.textContent = q.explanation || "";
       nextBtn.disabled = false;
       if (currentIndex === shuffledQuestions.length - 1) {
         nextBtn.textContent = "結果を表示";
-      } else {
-        nextBtn.textContent = "次の問題へ ▶";
       }
     }
 
@@ -558,6 +733,7 @@
       choicesListEl.innerHTML = "";
       feedbackEl.className = "";
       feedbackEl.textContent = "";
+      wrongCountEl.textContent = "";
       explanationEl.textContent = `あなたの正答数は ${score} / ${shuffledQuestions.length} でした。`;
       nextBtn.disabled = true;
       nextBtn.textContent = "終了";
@@ -567,7 +743,17 @@
       startQuiz();
     });
 
+    resetStatBtn.addEventListener("click", () => {
+      const ok = confirm("この端末に保存されている「よく間違える問題」の履歴をすべて消去しますか？");
+      if (!ok) return;
+      resetStats();
+      if (currentMode === "review") {
+        startQuiz();
+      }
+    });
+
     // 初期化
+    loadStats();
     startQuiz();
   </script>
 </body>
