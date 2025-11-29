@@ -105,11 +105,19 @@
       min-height: 1.2em;
     }
     #explanation {
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 14px;
-      min-height: 1.2em;
-    }
+  font-size: 0.9rem;
+  color: #111827;
+  margin-bottom: 14px;
+  min-height: 1.2em;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef2ff;              /* うすい青の背景で目立たせる */
+  border-left: 4px solid #4f46e5;   /* 左に色付きライン */
+  display: none;                    /* デフォルトでは非表示 */
+}
+#explanation.visible {
+  display: block;                   /* 解答後に表示 */
+}
     #controls {
       display: flex;
       justify-content: space-between;
