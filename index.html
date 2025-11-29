@@ -34,14 +34,14 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transition: background 0.2s ease;
       border: 2px solid transparent;
     }
     #app-card.review-mode {
-  border: none;          /* ←枠線なし */
-  box-shadow: none;      /* ←外枠の強調も消す */
-  background: #fff7ed;   /* ←背景色はそのまま維持 */
-}
+      border: none;      /* 枠線なし */
+      box-shadow: none;  /* 外枠の強調もなし */
+      background: #fff7ed;
+    }
     #status-bar {
       display: flex;
       justify-content: space-between;
@@ -104,20 +104,21 @@
       margin-bottom: 6px;
       min-height: 1.2em;
     }
+    /* 解説ボックスを目立たせる */
     #explanation {
-  font-size: 0.9rem;
-  color: #111827;
-  margin-bottom: 14px;
-  min-height: 1.2em;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #eef2ff;              /* うすい青の背景で目立たせる */
-  border-left: 4px solid #4f46e5;   /* 左に色付きライン */
-  display: none;                    /* デフォルトでは非表示 */
-}
-#explanation.visible {
-  display: block;                   /* 解答後に表示 */
-}
+      font-size: 0.9rem;
+      color: #111827;
+      margin-bottom: 14px;
+      min-height: 1.2em;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef2ff;              /* うすい青の背景で目立たせる */
+      border-left: 4px solid #4f46e5;   /* 左に色付きライン */
+      display: none;                    /* デフォルトでは非表示 */
+    }
+    #explanation.visible {
+      display: block;                   /* 解答後に表示 */
+    }
     #controls {
       display: flex;
       justify-content: space-between;
@@ -212,9 +213,9 @@
     <div class="tagline">
       高校「生物基礎」 内分泌系（指定13ホルモンのみ）
       <span class="badge">GitHub Pages</span>
-      <span class="badge">ランダム出題</span>
-      <span class="badge">復習モード</span>
       <span class="badge">選択肢シャッフル</span>
+      <span class="badge">復習モード</span>
+      <span class="badge">50問プールから20問ランダム</span>
     </div>
   </header>
 
@@ -223,15 +224,15 @@
       出題モード：
       <label for="mode-all">
         <input type="radio" id="mode-all" name="mode" value="all" checked />
-        全30問ランダム
+        全問題プールから20問
       </label>
       <label for="mode-mc">
         <input type="radio" id="mode-mc" name="mode" value="mc" />
-        四択問題のみ
+        四択問題だけから20問
       </label>
       <label for="mode-tf">
         <input type="radio" id="mode-tf" name="mode" value="tf" />
-        正誤（二択）のみ
+        正誤（二択）だけから20問
       </label>
       <label for="mode-review" class="review-label">
         <input type="radio" id="mode-review" name="mode" value="review" />
@@ -253,7 +254,7 @@
 
     <div id="controls">
       <button id="next-btn" disabled>次の問題へ ▶</button>
-      <button id="restart-btn">問題をシャッフルしてやり直す</button>
+      <button id="restart-btn">もう一度ランダムに20問解く</button>
       <button id="reset-stat-btn" title="この端末に保存された間違いデータを消去します">復習データをリセット</button>
       <div id="mode-info">※この端末のブラウザに「よく間違える問題」の履歴を保存します。</div>
     </div>
@@ -261,6 +262,7 @@
 
   <script>
     // クイズデータ: type: "mc" = 四択, "tf" = 正誤（二択）
+    // ホルモンは指定の13種類のみ使用
     const QUESTIONS = [
       {
         id: 1,
@@ -541,6 +543,209 @@
         choices: ["正しい", "誤り"],
         correctIndex: 0,
         explanation: "どちらも血糖値を上昇させるホルモンですが、糖質コルチコイドは比較的長期的、アドレナリンは急性的なストレス応答で働きます。"
+      },
+
+      /* ここから追加の20問（31〜50） */
+
+      {
+        id: 31,
+        type: "mc",
+        question: "ホルモンと分泌腺の組み合わせとして正しいものはどれか。",
+        choices: [
+          "インスリン ― 副腎皮質",
+          "チロキシン ― 甲状腺",
+          "アドレナリン ― すい臓",
+          "パラトルモン ― 脳下垂体前葉"
+        ],
+        correctIndex: 1,
+        explanation: "チロキシンは甲状腺から分泌されます。インスリンはすい臓、アドレナリンは副腎髄質、パラトルモンは副甲状腺から分泌されます。"
+      },
+      {
+        id: 32,
+        type: "mc",
+        question: "血糖値が低下したときに主に働くホルモンとその作用の組み合わせとして最も適当なものはどれか。",
+        choices: [
+          "グルカゴン ― 肝臓でグリコーゲン分解を促進する",
+          "インスリン ― 肝臓でグリコーゲン分解を促進する",
+          "チロキシン ― すい臓でインスリン分泌を抑制する",
+          "糖質コルチコイド ― すい臓でグルカゴン分泌を抑制する"
+        ],
+        correctIndex: 0,
+        explanation: "血糖値が下がるとグルカゴンが分泌され、肝臓でグリコーゲン分解を進めて血糖値を上げます。"
+      },
+      {
+        id: 33,
+        type: "mc",
+        question: "体液の浸透圧が上昇したときに分泌が増えるホルモンはどれか。",
+        choices: ["バソプレシン", "インスリン", "アドレナリン", "小腸ホルモン"],
+        correctIndex: 0,
+        explanation: "体液の浸透圧上昇時にはバソプレシンの分泌が増え、腎臓での水再吸収を促進して薄める方向に働きます。"
+      },
+      {
+        id: 34,
+        type: "mc",
+        question: "次のうち、副腎髄質ホルモン（アドレナリン）の作用ではないものはどれか。",
+        choices: [
+          "心拍数の増加",
+          "血糖値の上昇",
+          "気管支の拡張",
+          "血中カルシウム濃度の上昇"
+        ],
+        correctIndex: 3,
+        explanation: "血中カルシウム濃度の上昇は主にパラトルモンの作用であり、アドレナリンの典型的な作用ではありません。"
+      },
+      {
+        id: 35,
+        type: "mc",
+        question: "インスリンの作用について正しい記述はどれか。",
+        choices: [
+          "肝臓でグリコーゲン分解を促進し血糖値を上げる",
+          "骨からカルシウムを溶出させる",
+          "グルコースをグリコーゲンとして肝臓や筋肉に蓄えることを促す",
+          "腎臓で水の再吸収を促進する"
+        ],
+        correctIndex: 2,
+        explanation: "インスリンはグルコースをグリコーゲンとして蓄える働きなどを通して血糖値を下げます。"
+      },
+      {
+        id: 36,
+        type: "mc",
+        question: "視床下部―脳下垂体前葉―甲状腺の調節で、正しい順序を示すものはどれか。",
+        choices: [
+          "放出ホルモン → 甲状腺刺激ホルモン → チロキシン",
+          "甲状腺刺激ホルモン → 放出ホルモン → チロキシン",
+          "チロキシン → 甲状腺刺激ホルモン → 放出ホルモン",
+          "チロキシン → 放出ホルモン → 甲状腺刺激ホルモン"
+        ],
+        correctIndex: 0,
+        explanation: "視床下部の放出ホルモンが脳下垂体前葉を刺激し、甲状腺刺激ホルモンが分泌され、甲状腺に作用してチロキシンが分泌されます。"
+      },
+      {
+        id: 37,
+        type: "mc",
+        question: "成長ホルモンの分泌が長期間過剰になると起こりやすい状態として最も適当なものはどれか。",
+        choices: [
+          "低血糖が続く",
+          "身長や骨の成長が過度に進む",
+          "血中カルシウム濃度が著しく下がる",
+          "尿量が極端に増える"
+        ],
+        correctIndex: 1,
+        explanation: "成長ホルモンの過剰分泌は、成長期では巨人症、成人では末端肥大症など、骨や身体の過剰な成長を引き起こします。"
+      },
+      {
+        id: 38,
+        type: "mc",
+        question: "チロキシンの分泌低下でみられる症状として適当なものはどれか。",
+        choices: [
+          "代謝が低下し寒がりになる",
+          "血糖値が著しく上昇する",
+          "尿量が極端に増える",
+          "血中カルシウム濃度が上昇する"
+        ],
+        correctIndex: 0,
+        explanation: "チロキシンが減ると代謝が低下し、寒がり・むくみなどの症状が出やすくなります。"
+      },
+      {
+        id: 39,
+        type: "mc",
+        question: "副腎皮質刺激ホルモン（ACTH）の分泌を促す直接の原因として正しいものはどれか。",
+        choices: [
+          "視床下部からの放出ホルモン",
+          "副腎皮質からの糖質コルチコイド",
+          "副腎髄質からのアドレナリン",
+          "甲状腺からのチロキシン"
+        ],
+        correctIndex: 0,
+        explanation: "ACTHは視床下部の放出ホルモンによって分泌が促進されます。"
+      },
+      {
+        id: 40,
+        type: "mc",
+        question: "放出ホルモンが働く標的器官として最も適当なものはどれか。",
+        choices: ["脳下垂体前葉", "脳下垂体後葉", "副腎皮質", "すい臓"],
+        correctIndex: 0,
+        explanation: "放出ホルモン（放出因子）は視床下部から分泌され、脳下垂体前葉ホルモンの分泌を調節します。"
+      },
+      {
+        id: 41,
+        type: "tf",
+        question: "糖質コルチコイドは、長期のストレス時に多く分泌される副腎皮質ホルモンである。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "長期ストレス時には糖質コルチコイドが増え、血糖値の維持などに働きます。"
+      },
+      {
+        id: 42,
+        type: "tf",
+        question: "インスリンは、肝臓に働いてグリコーゲン分解を促進し、血糖値を上昇させる。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "グリコーゲン分解を促進して血糖値を上げるのはグルカゴンなどであり、インスリンは逆に血糖値を下げます。"
+      },
+      {
+        id: 43,
+        type: "tf",
+        question: "グルカゴンは、肝臓に働いてグリコーゲン分解を促進し、血糖値を上昇させる。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "グルカゴンは肝臓でのグリコーゲン分解や糖新生を促進し、血糖値を上昇させます。"
+      },
+      {
+        id: 44,
+        type: "tf",
+        question: "チロキシンの分泌が増えると、負のフィードバックにより甲状腺刺激ホルモンの分泌は抑えられる。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "チロキシン濃度が高くなると、視床下部・脳下垂体に働いて甲状腺刺激ホルモンの分泌を抑える負のフィードバックがはたらきます。"
+      },
+      {
+        id: 45,
+        type: "tf",
+        question: "バソプレシンは脳下垂体前葉から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "バソプレシン（抗利尿ホルモン）は視床下部で合成され、脳下垂体後葉から分泌されます。"
+      },
+      {
+        id: 46,
+        type: "tf",
+        question: "鉱質コルチコイドは腎臓でのナトリウム再吸収を促進し、その結果、水分の保持にもつながる。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "鉱質コルチコイドはNa⁺再吸収を促し、それに伴って水分も保持されるため、血圧維持に関わります。"
+      },
+      {
+        id: 47,
+        type: "tf",
+        question: "副甲状腺は甲状腺の内部にあり、チロキシンを分泌する。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "副甲状腺（上皮小体）は甲状腺の裏側に位置し、パラトルモンを分泌します。チロキシンは甲状腺から分泌されます。"
+      },
+      {
+        id: 48,
+        type: "tf",
+        question: "成長ホルモンは骨や筋肉の成長を促進し、成長期の身長の伸びにも関わっている。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "成長ホルモンは骨端線の発育などを通して身長の伸びにも関わります。"
+      },
+      {
+        id: 49,
+        type: "tf",
+        question: "放出抑制ホルモンは視床下部から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 0,
+        explanation: "放出ホルモンと同様に、放出抑制ホルモンも視床下部から分泌され、脳下垂体前葉ホルモンの分泌を抑制します。"
+      },
+      {
+        id: 50,
+        type: "tf",
+        question: "アドレナリンは副腎皮質から分泌される。",
+        choices: ["正しい", "誤り"],
+        correctIndex: 1,
+        explanation: "アドレナリンは副腎髄質から分泌されます。副腎皮質からは糖質コルチコイドや鉱質コルチコイドが分泌されます。"
       }
     ];
 
@@ -649,17 +854,26 @@
       updateModeStyles();
 
       const base = filteredQuestionsByMode(currentMode);
-      if (currentMode === "review" && base.length === 0) {
-        shuffledQuestions = [];
-        currentIndex = 0;
-        score = 0;
-        scoreEl.textContent = score;
-        totalQuestionsEl.textContent = 0;
-        showNoReviewMessage();
-        return;
+
+      if (currentMode === "review") {
+        // 復習モード：間違えたものをすべて出題
+        if (base.length === 0) {
+          shuffledQuestions = [];
+          currentIndex = 0;
+          score = 0;
+          scoreEl.textContent = score;
+          totalQuestionsEl.textContent = 0;
+          showNoReviewMessage();
+          return;
+        }
+        shuffledQuestions = shuffleArray(base);
+      } else {
+        // 通常モード：プールからランダム20問
+        const shuffledBase = shuffleArray(base);
+        const limit = Math.min(20, shuffledBase.length);
+        shuffledQuestions = shuffledBase.slice(0, limit);
       }
 
-      shuffledQuestions = shuffleArray(base);
       currentIndex = 0;
       score = 0;
       scoreEl.textContent = score;
@@ -670,7 +884,7 @@
     function showNoReviewMessage() {
       questionNumberEl.textContent = "-";
       questionTextEl.textContent =
-        "まだ「間違えた問題」の記録がありません。まずは通常モード（全30問など）で問題を解いてみましょう。";
+        "まだ「間違えた問題」の記録がありません。まずは通常モードで20問チャレンジしてみましょう。";
       choicesListEl.innerHTML = "";
       feedbackEl.textContent = "";
       feedbackEl.className = "";
@@ -688,7 +902,7 @@
       feedbackEl.className = "";
       wrongCountEl.textContent = "";
       explanationEl.textContent = "";
-      explanationEl.classList.remove("visible");  // ★ 解説ボックスを隠す
+      explanationEl.classList.remove("visible");
 
       const q = shuffledQuestions[currentIndex];
       questionNumberEl.textContent = currentIndex + 1;
@@ -771,7 +985,8 @@
       }
 
       explanationEl.innerHTML = "<strong>【解説】</strong><br>" + (q.explanation || "");
-　　　explanationEl.classList.add("visible");  // ★ ボックスを表示
+      explanationEl.classList.add("visible");
+
       nextBtn.disabled = false;
       if (currentIndex === shuffledQuestions.length - 1) {
         nextBtn.textContent = "結果を表示";
@@ -788,13 +1003,13 @@
     });
 
     function showResult() {
-      questionTextEl.textContent = "お疲れさまでした！ 全問題が終了しました。";
+      questionTextEl.textContent = "お疲れさまでした！ 今回の問題はこれで終了です。";
       choicesListEl.innerHTML = "";
       feedbackEl.className = "";
       feedbackEl.textContent = "";
       wrongCountEl.textContent = "";
-      explanationEl.classList.remove("visible");
-      explanationEl.textContent = `あなたの正答数は ${score} / ${shuffledQuestions.length} でした。`;
+      explanationEl.classList.add("visible");
+      explanationEl.innerHTML = `今回の正答数は <strong>${score} / ${shuffledQuestions.length}</strong> でした。`;
       nextBtn.disabled = true;
       nextBtn.textContent = "終了";
     }
